@@ -31,3 +31,18 @@ def get_participants():
             ]
 
             return pd.DataFrame(rows, columns=columns)
+
+def delete_participant(db_id):
+    with get_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                "DELETE FROM participants WHERE id = %s;",
+                (db_id,)
+            )
+        conn.commit()
+
+def delete_all_participants():
+    with get_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute("DELETE FROM participants;")
+        conn.commit()
