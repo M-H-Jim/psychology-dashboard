@@ -7,6 +7,10 @@ from database import (
 )
 
 
+st.set_page_config(layout="wide")
+
+
+
 st.title("🗃️ Raw Data")
 st.caption("Complete participant dataset")
 
@@ -53,6 +57,37 @@ df = df.rename(columns=clt_column_names)
 
 
 
+
+# ─────────────────────────────────────────────
+# ADEXI question labels
+# ─────────────────────────────────────────────
+
+adexi_questions = [
+    "আমার দীর্ঘ নির্দেশনা মনে রাখতে অসুবিধা হয়।",
+    "কোনো কাজের মাঝখানে আমি কী করছিলাম তা মনে রাখতে আমার অসুবিধা হয়।",
+    "কী ঘটতে পারে তা আগে না ভেবেই কাজ করে ফেলার প্রবণতা আমার আছে।",
+    "কেউ নিষেধ করলেও আমার পছন্দের কোনো কাজ থেকে নিজেকে বিরত রাখতে আমার অসুবিধা হয়।",
+    "কেউ আমাকে একসঙ্গে কয়েকটি কাজ করতে বললে, আমি শুধু প্রথমটি অথবা শেষটি মনে রাখি।",
+    "অনুপযুক্ত পরিস্থিতিতে হাসি বা অট্টহাসি থেকে বিরত থাকতে আমার অসুবিধা হয়।",
+    "কোনো সমস্যায় আটকে গেলে সেটি সমাধানের ভিন্ন উপায় বের করতে আমার অসুবিধা হয়।",
+    "কেউ আমাকে কিছু আনতে বললে, কী আনতে হবে তা আমি ভুলে যাই।",
+    "কোনো কাজের পরিকল্পনা করতে আমার অসুবিধা হয় (যেমন, ভ্রমণে, কাজে বা স্কুলে যাওয়ার সময় প্রয়োজনীয় সবকিছু সঙ্গে নেওয়ার কথা মনে রাখা)।",
+    "আমার পছন্দের কোনো কাজ থামাতে আমার অসুবিধা হয় (যেমন, ঘুমানোর সময় হয়ে গেলেও সন্ধ্যায় টিভি দেখা বা কম্পিউটারের সামনে বসে থাকা)।",
+    "কীভাবে করতে হবে তা দেখিয়ে না দিলে শুধু মৌখিক নির্দেশনা বুঝতে আমার অসুবিধা হয়।",
+    "একাধিক ধাপ রয়েছে এমন কাজ বা কার্যক্রম করতে আমার অসুবিধা হয়।",
+    "আগাম চিন্তা করতে বা অভিজ্ঞতা থেকে শিখতে আমার অসুবিধা হয়।",
+    "আমার সঙ্গে যাদের দেখা হয়, তারা আমাকে আমার সমবয়সীদের তুলনায় বেশি প্রাণবন্ত বা চঞ্চল মনে করেন বলে মনে হয়।"
+]
+
+adexi_column_names = {
+    f"adexi_{i:02d}": question
+    for i, question in enumerate(adexi_questions, start=1)
+}
+
+df = df.rename(columns=adexi_column_names)
+
+
+
 # ─────────────────────────────────────────────
 # Reorder columns
 # ─────────────────────────────────────────────
@@ -63,10 +98,6 @@ desired_order = [
     "group_name",
 
     # Pre-tests
-    "corsi_score",
-    "corsi_percentile",
-    "digit_span_score",
-    "digit_span_percentile",
     "trail_a",
     "trail_b",
     "trail_difference",
@@ -82,10 +113,6 @@ desired_order = [
     "mcq4",
 
     # Post-tests
-    "post_corsi_score",
-    "post_corsi_percentile",
-    "post_digit_span_score",
-    "post_digit_span_percentile",
     "post_trail_a",
     "post_trail_b",
     "post_trail_difference",
@@ -93,6 +120,8 @@ desired_order = [
 
     # Cognitive Load
     *clt_column_names.values(),
+    # ADEXI
+    *adexi_column_names.values(),
 ]
 
 
@@ -161,9 +190,15 @@ with right:
 
         else:
 
+            selected_id = int(df.loc[selected_index, "id"])
+            selected_name = df.loc[selected_index, "name"]
+
             st.warning(
-                f"Are you sure you want to delete Participant {selected_index}?"
+                f"You're about to permanently delete participant "
+                f"'{selected_name}'."
             )
+
+            st.caption("This action cannot be undone.")
 
             col1, col2 = st.columns(2)
 
@@ -178,7 +213,7 @@ with right:
                     st.session_state.confirm_delete = False
 
                     st.success(
-                        f"Participant {selected_index} deleted successfully."
+                        f"Participant {selected_name} deleted successfully."
                     )
 
                     st.rerun()
@@ -226,7 +261,7 @@ with right:
             )
 
             delete_code = st.text_input(
-                "Enter confirmation code",
+                "Type 'DELETE ALL' to confirm",
                 type="password"
             )
 
@@ -236,7 +271,7 @@ with right:
 
                 if st.button("Confirm Delete All"):
 
-                    if delete_code == "1234":
+                    if delete_code == "DELETE ALL":
 
                         delete_all_participants()
 
