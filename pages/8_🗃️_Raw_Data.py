@@ -80,11 +80,16 @@ adexi_questions = [
 ]
 
 adexi_column_names = {
-    f"adexi_{i:02d}": f"[ADEXI-{i:02d}] {question}"
+    f"adexi_{i:02d}": f"[ADEXI post-{i:02d}] {question}"
+    for i, question in enumerate(adexi_questions, start=1)
+}
+pre_adexi_column_names = {
+    f"pre_adexi_{i:02d}": f"[ADEXI Pre-{i:02d}] {question}"
     for i, question in enumerate(adexi_questions, start=1)
 }
 
 df = df.rename(columns=adexi_column_names)
+df = df.rename(columns=pre_adexi_column_names)
 
 
 
@@ -96,6 +101,9 @@ desired_order = [
     "id",
     "name",
     "group_name",
+
+    # ADEXI Pre-test
+    *pre_adexi_column_names.values(),
 
     # Pre-tests
     "trail_a",
@@ -112,6 +120,9 @@ desired_order = [
     "mcq3",
     "mcq4",
 
+    # ADEXI
+    *adexi_column_names.values(),
+
     # Post-tests
     "post_trail_a",
     "post_trail_b",
@@ -120,8 +131,7 @@ desired_order = [
 
     # Cognitive Load
     *clt_column_names.values(),
-    # ADEXI
-    *adexi_column_names.values(),
+
 ]
 
 
